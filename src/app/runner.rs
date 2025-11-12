@@ -40,7 +40,7 @@ impl App {
             .nest_service("/static", ServeDir::new("./static"));
 
         println!("  Ready!\n");
-        let listener = TcpListener::bind(SocketAddr::from((Ipv4Addr::LOCALHOST, self.port.clone()))).await?;
+        let listener = TcpListener::bind(SocketAddr::from((Ipv4Addr::UNSPECIFIED, self.port.clone()))).await?;
         axum::serve(listener, app)
             .with_graceful_shutdown(shutdown_signal())
             .await

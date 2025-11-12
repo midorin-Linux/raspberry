@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
     let config = Config::load()?;
     let _ = init_tracing(config.clone())?;
 
-    println!("  - Local:    http://{}:{}", Ipv4Addr::LOCALHOST.to_string(), config.port.clone());
+    println!("  - Local:    http://{}:{}", Ipv4Addr::UNSPECIFIED.to_string(), config.port.clone());
 
     println!("\n  Starting...");
     let mut app = app::runner::App::new(config)?;
