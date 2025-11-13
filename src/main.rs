@@ -1,10 +1,10 @@
 mod app;
 mod utils;
-mod response;
+mod handles;
+mod models;
 
 use crate::app::config::Config;
 use crate::utils::logging::init_tracing;
-use std::net::Ipv4Addr;
 
 use anyhow::Result;
 

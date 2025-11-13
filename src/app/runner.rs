@@ -1,5 +1,4 @@
 use crate::app::{config::Config, shutdown::shutdown_signal};
-use crate::response::index;
 use std::{
     net::{Ipv4Addr, SocketAddr},
     time::Duration,
@@ -45,8 +44,7 @@ impl App {
                 TraceLayer::new_for_http(),
                 TimeoutLayer::new(Duration::from_secs(10)),
             ))
-            .route("/", get(index::root))
-            .nest_service("/static", ServeDir::new("./static"));
+            .nest_service("/", ServeDir::new("./static"));
 
         let listener =
             TcpListener::bind(SocketAddr::from((Ipv4Addr::UNSPECIFIED, self.port.clone()))).await?;
