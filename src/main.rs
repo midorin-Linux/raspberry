@@ -16,8 +16,7 @@ async fn main() -> Result<()> {
     let _ = init_tracing(config.clone())?;
 
     println!("  - Local:    http://127.0.0.1:{}", config.port.clone());
-
-    println!("\n  Starting...");
+    
     let mut app = app::runner::App::new(config)?;
     app.run().await?;
 
