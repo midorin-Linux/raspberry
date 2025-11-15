@@ -1,37 +1,32 @@
-use crate::models::specifications::{SpecResponse, SpecResponseItem};
+use crate::models::specifications::SpecResponse;
 
 use anyhow::Result;
 use axum::{extract::Path, http::StatusCode, response::{IntoResponse, Json}};
 use serde::Deserialize;
 use sysinfo::{System};
 
-#[derive(Debug, Deserialize)]
-pub struct PathPayload {
-    pub item: String,
-}
-
-pub async fn get_spec(Path(path): Path<PathPayload>) -> impl IntoResponse {
+pub async fn get_spec() -> impl IntoResponse {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let description = match path.item.as_str() {
-        "name" => System::host_name().unwrap_or_else(|| "Unknown".to_string()),
-        "os" => System::name().unwrap_or_else(|| "Unknown".to_string()),
-        "kernel" => System::kernel_version().unwrap_or_else(|| "Unknown".to_string()),
-        "cpu" => {
-            let cpu = sys.cpus().first().unwrap();
-            // ToDo: コア数も返す
-            format!("{}", cpu.brand())
-        },
-        "memory" => format!("{} MB", sys.total_memory() / 1024 / 1024),
-        _ => return (StatusCode::BAD_REQUEST, Json(SpecResponseItem {
-            item: path.item.clone(),
-            description: "Unknown item type".to_string(),
-        })).into_response(),
+    let (hostname, os, kernel, processor_brand, processor_len, ram) = {
+        let hostname = System::host_name().unwrap_or_else(|| "Unknown".to_string());
+        let os = System::long_os_version().unwrap_or_else(|| "Unknown".to_string());
+        let kernel = System::kernel_version().unwrap_or_else(|| "Unknown".to_string());
+        let processor_brand = sys.cpus().first().unwrap().brand();
+        let processor_len = sys.cpus().len();
+        let ram = sys.total_memory() / 1000 / 1000 / 1000;
+
+        (hostname, os, kernel, processor_brand, processor_len, ram)
     };
 
-    Json(SpecResponseItem {
-        item: path.item,
-        description,
-    }).into_response()
+    let device_spec = SpecResponse {
+        hostname: hostname,
+        os: os,
+        kernel: kernel,
+        processor: format!("{} x {}", processor_brand, processor_len),
+        ram: format!("{} GB", ram),
+    };
+
+    Json(device_spec)
 }

@@ -45,7 +45,7 @@ impl App {
                 TraceLayer::new_for_http(),
                 TimeoutLayer::new(Duration::from_secs(10)),
             ))
-            .route("/api/spec/{item}", get(specifications::get_spec))
+            .route("/api/device-spec", get(specifications::get_spec))
             .fallback_service(ServeDir::new("./static"));
 
         let listener =
