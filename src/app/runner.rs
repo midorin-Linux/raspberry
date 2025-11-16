@@ -32,7 +32,7 @@ impl App {
     pub async fn run(&mut self) -> Result<()> {
         println!();
         let pb = ProgressBar::new_spinner();
-        pb.enable_steady_tick(std::time::Duration::from_millis(100));
+        pb.enable_steady_tick(Duration::from_millis(100));
         pb.set_style(
             ProgressStyle::with_template("{spinner} {msg}")
                 .unwrap()
@@ -45,8 +45,10 @@ impl App {
                 TraceLayer::new_for_http(),
                 TimeoutLayer::new(Duration::from_secs(10)),
             ))
-            .route("/api/device-spec", get(specifications::get_spec))
-            .fallback_service(ServeDir::new("./static"));
+            .route("/api/device-components", get(specifications::get_full_spec))
+            .nest_service("/info", ServeDir::new("./static").append_index_html_on_directories(true).not_found_service(ServeDir::new("./static")))
+            .nest_service("/monitor", ServeDir::new("./static").append_index_html_on_directories(true).not_found_service(ServeDir::new("./static")))
+            .fallback_service(ServeDir::new("./static").append_index_html_on_directories(true).not_found_service(ServeDir::new("./static")));
 
         let listener =
             TcpListener::bind(SocketAddr::from((Ipv4Addr::UNSPECIFIED, self.port.clone()))).await?;
